@@ -4,7 +4,8 @@ const P = {
   plus:'<path d="M12 5v14M5 12h14"/>', edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/>', trash:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
   out:'<path d="M15 4h5v5M20 4l-9 9M18 14v5H5V6h5"/>', logout:'<path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/>',
   sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/>',
-  moon:'<path d="M20 14A8 8 0 1110 4a7 7 0 0010 10z"/>', x:'<path d="M6 6l12 12M18 6L6 18"/>'
+  moon:'<path d="M20 14A8 8 0 1110 4a7 7 0 0010 10z"/>', x:'<path d="M6 6l12 12M18 6L6 18"/>',
+  menu:'<path d="M4 7h16M4 12h16M4 17h16"/>', check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>', sort:'<path d="M8 4v16M8 4L5 7M8 4l3 3M16 20V4M16 20l-3-3M16 20l3-3"/>', reset:'<path d="M4 12a8 8 0 108-8H7M7 4L4.5 6.5 7 9"/>'
 };
 export const icon = n => `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${P[n]}</svg>`;
 export const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -45,4 +46,12 @@ export async function api(path, opts = {}) {
   const d = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(d.error || 'Algo deu errado.');
   return d;
+}
+
+// Cores de destaque (valores ficam só no CSS, em [data-accent=...])
+export const ACCENTS = [['blue','Azul'],['red','Vermelho'],['green','Verde'],['purple','Roxo'],['orange','Laranja'],['pink','Rosa'],['graphite','Grafite']];
+export const getAccent = () => document.documentElement.dataset.accent || 'blue';
+export function setAccent(n) {
+  document.documentElement.dataset.accent = n; try { localStorage.setItem('sh-accent', n); } catch {}
+  document.dispatchEvent(new Event('accentchange'));
 }

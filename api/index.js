@@ -73,6 +73,12 @@ export default async function handler(req, res) {
     if (!authed(req)) return json(res, 401, { error: 'Sessão expirada.' });
     if (path === '/me') return json(res, 200, { ok: true });
 
+    if (path === '/projects/order' && req.method === 'PUT') {
+      const ids = (await readBody(req)).ids; if (!Array.isArray(ids)) throw new Error('Ordem inválida.');
+      const { list, sha: s0 } = await load(), rank = new Map(ids.map((x, i) => [x, i]));
+      list.sort((a, b) => (rank.get(a.id) ?? 1e9) - (rank.get(b.id) ?? 1e9)); // estável: ids desconhecidos ficam no fim
+      await save(list, s0, 'Reordenar projetos'); return json(res, 200, { ok: true });
+    }
     const m = /^\/projects(?:\/([\w-]+))?$/.exec(path);
     if (!m) return json(res, 404, { error: 'Não encontrado.' });
     const id = m[1], { list, sha: fileSha } = await load();
