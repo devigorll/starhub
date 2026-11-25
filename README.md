@@ -12,6 +12,11 @@ Em vez de editar o código do portfólio a cada novo projeto, você entra no pai
 - Tema claro (padrão) e escuro, com preferência salva. Fundo estrelado nos dois temas: estrelas cinzas sobre branco no claro e claras sobre azul-preto no escuro.
 - Estados vazios, avisos de ação e layout adaptado a celular, tablet e desktop.
 
+## Design e desempenho
+- Visual minimalista inspirado na Apple: fonte do sistema (SF Pro no Apple, sem webfonts), paleta cinza/branco/preto, um único acento azul discreto e nenhum brilho, neon ou blur.
+- Céu estrelado em um único `<canvas>` desenhado uma vez (de novo só ao trocar tema ou largura), com deriva lenta feita só por `transform` na GPU. Respeita `prefers-reduced-motion`.
+- Animações limitam-se a cor, opacidade e transform; cards são opacos e isolados com `contain`.
+
 ## Arquitetura (sem banco de dados)
 - **Frontend:** HTML, CSS e JavaScript puros, em `public/`.
 - **Backend:** uma função serverless da Vercel (`api/index.js`), sem dependências.

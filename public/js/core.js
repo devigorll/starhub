@@ -13,20 +13,32 @@ export function toast(msg) {
   clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2200);
 }
 export function initTheme(btn) {
-  const set = t => { document.documentElement.dataset.theme = t; try { localStorage.setItem('sh-theme', t); } catch {} if (btn) { btn.innerHTML = icon(t === 'dark' ? 'sun' : 'moon'); btn.setAttribute('aria-label', t === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'); } };
+  const set = t => {
+    document.documentElement.dataset.theme = t; try { localStorage.setItem('sh-theme', t); } catch {}
+    if (btn) { btn.innerHTML = icon(t === 'dark' ? 'sun' : 'moon'); btn.setAttribute('aria-label', t === 'dark' ? 'Usar tema claro' : 'Usar tema escuro'); }
+    document.dispatchEvent(new Event('themechange'));
+  };
   set(document.documentElement.dataset.theme || 'light');
   btn?.addEventListener('click', () => set(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'));
 }
-// Estrelas: 3 camadas (tamanhos/velocidades distintas) com box-shadow; a cor segue o tema via --star
+// Estrelas: um canvas com altura 2x, desenhado só ao carregar, ao mudar a largura ou o tema.
+// A mesma posição das estrelas se repete na 2ª metade, então a deriva em CSS (translateY -50%) fecha sem emenda.
 export function stars() {
-  const el = document.getElementById('space'); if (!el) return;
-  [[1,90,120],[2,45,80],[3,18,50]].forEach(([size, n, dur]) => {
-    const i = document.createElement('i');
-    i.style.cssText = `width:${size}px;height:${size}px;animation-duration:${dur*3}s;background:transparent;box-shadow:` +
-      Array.from({length: n * 2}, (_, k) => `${(Math.random()*100).toFixed(1)}vw ${(k % 2 ? 2000 : 0) + Math.random()*2000 % 2000}px rgb(var(--star) / ${(.35+Math.random()*.65).toFixed(2)})`).join(',');
-    el.append(i);
-  });
+  const c = document.getElementById('space'); if (!c) return;
+  const ctx = c.getContext('2d'); let W = 0, pts = [];
+  const seed = () => { const n = Math.min(260, Math.round(innerWidth * innerHeight / 9000) + 40);
+    pts = Array.from({length: n}, () => ({x: Math.random(), y: Math.random(), r: Math.random() < .85 ? .6 : Math.random() < .8 ? 1 : 1.4, a: .3 + Math.random() * .7})); };
+  const draw = () => {
+    const d = Math.min(devicePixelRatio || 1, 1.5), w = innerWidth, h = Math.max(innerHeight, screen.height || 0);
+    c.width = w * d; c.height = h * 2 * d; c.style.height = h * 2 + 'px'; ctx.setTransform(d, 0, 0, d, 0, 0);
+    const rgb = getComputedStyle(document.documentElement).getPropertyValue('--star').trim().split(/\s+/).join(',');
+    for (const p of pts) { ctx.fillStyle = `rgba(${rgb},${p.a})`; for (const o of [0, h]) { ctx.beginPath(); ctx.arc(p.x * w, p.y * h + o, p.r, 0, 6.2832); ctx.fill(); } }
+  };
+  seed(); W = innerWidth; draw();
+  document.addEventListener('themechange', draw);
+  let t; addEventListener('resize', () => { if (innerWidth === W) return; clearTimeout(t); t = setTimeout(() => { W = innerWidth; draw(); }, 200); }); // ignora a barra do navegador no celular
 }
+
 export async function api(path, opts = {}) {
   const r = await fetch('/api' + path, { credentials: 'same-origin', ...opts, headers: { 'Content-Type': 'application/json' }, body: opts.body && JSON.stringify(opts.body) });
   if (r.status === 401 && path !== '/login') location.href = '/login';
