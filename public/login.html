@@ -1,0 +1,17 @@
+<!doctype html><html lang="pt-BR" data-theme="light"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>StarHub · Entrar</title>
+<link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600&family=Orbitron:wght@600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<script>try{document.documentElement.dataset.theme=localStorage.getItem('sh-theme')||'light'}catch(e){}</script></head>
+<body><div id="space"></div><button class="btn corner" id="theme"></button>
+<main class="login"><form id="f"><div class="brand" id="brand"></div>
+<label>E-mail<input type="email" name="email" autocomplete="username" required></label>
+<label>Senha<input type="password" name="password" autocomplete="current-password" required></label>
+<p class="err" id="err" role="alert"></p><button class="btn primary" style="justify-content:center">Entrar</button></form></main>
+<div id="toast"></div>
+<script type="module">
+import {icon,initTheme,stars,api} from '/js/core.js';
+brand.innerHTML=icon('star')+'StarHub';initTheme(theme);stars();
+f.onsubmit=async e=>{e.preventDefault();err.textContent='';
+ try{await api('/login',{method:'POST',body:Object.fromEntries(new FormData(f))});location.href='/app'}catch(x){err.textContent=x.message}};
+</script></body></html>
